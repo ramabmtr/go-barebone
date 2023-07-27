@@ -19,8 +19,8 @@ import (
 
 func SkipperByURLPath(paths ...string) func(c echo.Context) bool {
 	return func(c echo.Context) bool {
-		for i, _ := range paths {
-			if strings.Contains(c.Request().URL.Path, paths[i]) {
+		for _, path := range paths {
+			if strings.Contains(c.Request().URL.Path, path) {
 				return true
 			}
 		}
