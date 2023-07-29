@@ -17,7 +17,13 @@ $ make run
 
 ### Configuration
 
-This app have some configurable setting that lies in `conf.yaml`.
+This app have some configurable setting that lies in `conf.yaml`. But you must generate it first.
+
+To generate config file from config file template, run
+
+```shell
+$ make generate-config
+```
 
 #### Database Config
 

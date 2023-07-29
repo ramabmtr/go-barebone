@@ -1,14 +1,15 @@
 APP_NAME := go-barebone
 APP_DIR := $(shell pwd)
 BUILD_DIR := $(APP_DIR)/bin
-
+CONFIG_FILE_TMPL := conf.yaml.tmpl
+CONFIG_FILE := conf.yaml
 DOCS_GENERATOR_TOOL := $(BUILD_DIR)/swag
 DOCS_GENERATOR_TOOL_SOURCE := github.com/swaggo/swag/cmd/swag
 DOCS_GENERATOR_TOOL_TAG := v1.8.12
 
 .PHONY: run
 
-run: build
+run: generate-config build
 	@$(BUILD_DIR)/$(APP_NAME)
 
 build: dep generate-docs
@@ -21,6 +22,16 @@ dep:
 	@echo "Downloading dependencies..."
 	@go mod tidy
 	@echo "Dependencies downloaded"
+
+generate-config:
+ifeq ("$(wildcard $(CONFIG_FILE))","")
+	@echo "Generating config file..."
+	@cp $(CONFIG_FILE_TMPL) $(CONFIG_FILE)
+	@echo "Config file generated"
+else
+	@echo "$(CONFIG_FILE) is exist"
+endif
+
 
 generate-docs: check-docs-generator-tool
 	@echo "Generating docs..."

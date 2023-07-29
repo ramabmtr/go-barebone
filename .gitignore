@@ -25,3 +25,7 @@ bin
 
 # docs files, build with `make generate-docs`
 docs
+
+# local conf
+conf.yaml
+conf-*.yaml
