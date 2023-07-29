@@ -30,7 +30,7 @@ func restricted() echo.MiddlewareFunc {
 				c.Error(errors.ErrUnauthorized)
 				return
 			}
-			appctx.SetAuthInfo(c, claims)
+			appctx.SetEchoAuthInfo(c, claims)
 		},
 		ErrorHandler: func(c echo.Context, err error) error {
 			return c.JSON(http.StatusUnauthorized, entity.MessageResponse{Message: err.Error()})

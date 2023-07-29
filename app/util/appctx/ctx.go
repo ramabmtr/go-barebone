@@ -4,22 +4,38 @@ import (
 	"context"
 
 	"github.com/labstack/echo/v4"
-	"github.com/ramabmtr/go-barebone/app/errors"
 	"github.com/ramabmtr/go-barebone/app/service/entity"
 )
 
-func SetAuthInfo(c echo.Context, claims *entity.JWTCustomClaims) {
+const (
+	CtxAuthInfo  = "ctx::auth-info"
+	CtxRequestID = "ctx::request-id"
+)
+
+func SetEchoRequestID(c echo.Context, rid string) {
 	ctx := c.Request().Context()
-	ctx = context.WithValue(ctx, entity.CtxAuthInfo, claims)
+	ctx = SetRequestID(ctx, rid)
 	c.SetRequest(c.Request().Clone(ctx))
-	c.Set(entity.CtxAuthInfo, claims)
+	c.Set(CtxRequestID, rid)
 }
 
-func GetAuthInfo(ctx context.Context) (*entity.JWTCustomClaims, error) {
-	claims, ok := ctx.Value(entity.CtxAuthInfo).(*entity.JWTCustomClaims)
-	if !ok || claims == nil {
-		return nil, errors.ErrUnauthorized
-	}
+func SetRequestID(ctx context.Context, rid string) context.Context {
+	return context.WithValue(ctx, CtxRequestID, rid)
+}
 
-	return claims, nil
+func GetRequestID(ctx context.Context) string {
+	rid, _ := ctx.Value(CtxRequestID).(string)
+	return rid
+}
+
+func SetEchoAuthInfo(c echo.Context, claims *entity.JWTCustomClaims) {
+	ctx := c.Request().Context()
+	ctx = context.WithValue(ctx, CtxAuthInfo, claims)
+	c.SetRequest(c.Request().Clone(ctx))
+	c.Set(CtxAuthInfo, claims)
+}
+
+func GetAuthInfo(ctx context.Context) *entity.JWTCustomClaims {
+	claims, _ := ctx.Value(CtxAuthInfo).(*entity.JWTCustomClaims)
+	return claims
 }

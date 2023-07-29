@@ -32,3 +32,7 @@ cache:
       port: 3306
       pass: pass
       db: 0
+
+scheduler:
+  - name: ping
+    crontab: "*/1 * * * *"

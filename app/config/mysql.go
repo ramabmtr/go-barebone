@@ -37,7 +37,7 @@ func InitMySQLConn() {
 		)
 		db, err := gorm.Open(mysql.Open(dsn), &conf)
 		if err != nil {
-			log.Fatal("failed to connect to mysql")
+			log.Fatalf("failed to connect to mysql. %s\n", err.Error())
 		}
 
 		MySQLConn = db

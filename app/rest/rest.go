@@ -15,6 +15,7 @@ import (
 	"github.com/ramabmtr/go-barebone/app/errors"
 	"github.com/ramabmtr/go-barebone/app/rest/handler"
 	"github.com/ramabmtr/go-barebone/app/service/entity"
+	"github.com/ramabmtr/go-barebone/app/util/appctx"
 )
 
 func SkipperByURLPath(paths ...string) func(c echo.Context) bool {
@@ -54,7 +55,11 @@ func Run(h *handler.Handler) {
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORS())
 	e.Use(middleware.Gzip())
-	e.Use(middleware.RequestID())
+	e.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
+		RequestIDHandler: func(e echo.Context, rid string) {
+			appctx.SetEchoRequestID(e, rid)
+		},
+	}))
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		DisableErrorHandler: true,
 	}))

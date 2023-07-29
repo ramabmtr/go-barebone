@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/ramabmtr/go-barebone/app/errors"
 	"github.com/ramabmtr/go-barebone/app/service/entity"
 	"github.com/ramabmtr/go-barebone/app/util/appctx"
 )
@@ -36,9 +35,9 @@ func (h *ping) Ping(c echo.Context) error {
 // @router /ping-restrict [get]
 func (h *ping) PingRestrict(c echo.Context) error {
 	ctx := c.Request().Context()
-	authInfo, err := appctx.GetAuthInfo(ctx)
-	if err != nil {
-		return c.JSON(errors.ErrorToHTTPCode(err), entity.MessageResponse{Message: err.Error()})
+	authInfo := appctx.GetAuthInfo(ctx)
+	if authInfo == nil {
+		return c.JSON(http.StatusUnauthorized, entity.MessageResponse{Message: "unauthorized"})
 	}
 
 	return c.JSON(http.StatusOK, entity.MessageResponse{Message: authInfo.Username})

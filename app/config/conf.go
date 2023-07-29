@@ -62,6 +62,11 @@ type config struct {
 			} `yaml:"redis"`
 		} `yaml:"config"`
 	} `yaml:"cache"`
+
+	Scheduler []struct {
+		Name    string `yaml:"name"`
+		Crontab string `yaml:"crontab"`
+	} `yaml:"scheduler"`
 }
 
 func InitConf(confPath string) {

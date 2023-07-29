@@ -24,7 +24,7 @@ func InitRedisConn() {
 		})
 		err := r.Ping(context.TODO()).Err()
 		if err != nil {
-			log.Fatal("failed to connect to redis")
+			log.Fatalf("failed to connect to redis. %s\n", err.Error())
 		}
 
 		RedisConn = r
