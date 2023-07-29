@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -17,6 +15,18 @@ import (
 	"github.com/ramabmtr/go-barebone/app/service/entity"
 	"github.com/ramabmtr/go-barebone/app/util/appctx"
 )
+
+type Rest struct {
+	e *echo.Echo
+	h *handler.Handler
+}
+
+func New(h *handler.Handler) *Rest {
+	return &Rest{
+		e: echo.New(),
+		h: h,
+	}
+}
 
 func SkipperByURLPath(paths ...string) func(c echo.Context) bool {
 	return func(c echo.Context) bool {
@@ -29,10 +39,8 @@ func SkipperByURLPath(paths ...string) func(c echo.Context) bool {
 	}
 }
 
-func Run(h *handler.Handler) {
-	e := echo.New()
-
-	e.Validator = config.GetValidator()
+func (r *Rest) Run() {
+	r.e.Validator = config.GetValidator()
 
 	echo.NotFoundHandler = func(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, entity.MessageResponse{Message: "route not found"})
@@ -42,7 +50,7 @@ func Run(h *handler.Handler) {
 		return c.JSON(http.StatusMethodNotAllowed, entity.MessageResponse{Message: "method not allowed"})
 	}
 
-	e.HTTPErrorHandler = func(err error, c echo.Context) {
+	r.e.HTTPErrorHandler = func(err error, c echo.Context) {
 		if !c.Response().Committed {
 			if c.Request().Method == http.MethodHead {
 				err = c.NoContent(errors.ErrorToHTTPCode(err))
@@ -52,18 +60,18 @@ func Run(h *handler.Handler) {
 		}
 	}
 
-	e.Pre(middleware.RemoveTrailingSlash())
-	e.Use(middleware.CORS())
-	e.Use(middleware.Gzip())
-	e.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
+	r.e.Pre(middleware.RemoveTrailingSlash())
+	r.e.Use(middleware.CORS())
+	r.e.Use(middleware.Gzip())
+	r.e.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
 		RequestIDHandler: func(e echo.Context, rid string) {
 			appctx.SetEchoRequestID(e, rid)
 		},
 	}))
-	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
+	r.e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		DisableErrorHandler: true,
 	}))
-	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+	r.e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		Skipper:   SkipperByURLPath("docs"),
 		LogURI:    true,
 		LogStatus: true,
@@ -74,22 +82,20 @@ func Run(h *handler.Handler) {
 		},
 	}))
 
-	RegisterRouter(e, h)
+	r.registerRouter()
 
 	go func() {
-		err := e.Start(fmt.Sprintf(":%s", config.Conf.App.Port))
+		err := r.e.Start(fmt.Sprintf(":%s", config.Conf.App.Port))
 		if err != nil && err != http.ErrServerClosed {
 			log.Fatal("shutting down the server")
 		}
 	}()
+}
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
-	<-quit
-
-	ctx, cancel := context.WithTimeout(context.Background(), config.Conf.App.ShutdownTimeout)
-	defer cancel()
-	if err := e.Shutdown(ctx); err != nil {
-		log.Fatal(err)
+func (r *Rest) Stop(ctx context.Context) {
+	defer log.Println("rest stopped")
+	err := r.e.Shutdown(ctx)
+	if err != nil {
+		log.Printf("error stopping rest. %s", err.Error())
 	}
 }

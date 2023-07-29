@@ -39,16 +39,16 @@ func restricted() echo.MiddlewareFunc {
 	})
 }
 
-func RegisterRouter(e *echo.Echo, h *handler.Handler) {
-	e.Any("/ping", h.Ping.Ping)
-	e.Any("/ping-restrict", h.Ping.PingRestrict, restricted())
+func (r *Rest) registerRouter() {
+	r.e.Any("/ping", r.h.Ping.Ping)
+	r.e.Any("/ping-restrict", r.h.Ping.PingRestrict, restricted())
 
 	// docs related
 	if config.Conf.FeatureFlag.EnableDocs {
-		e.GET("/docs", handler.ServeDoc)
-		e.GET("/docs/swagger.yaml", handler.DocsSpec)
+		r.e.GET("/docs", handler.ServeDoc)
+		r.e.GET("/docs/swagger.yaml", handler.DocsSpec)
 	}
 
-	e.POST("/register", h.User.Register)
-	e.POST("/login", h.User.Login)
+	r.e.POST("/register", r.h.User.Register)
+	r.e.POST("/login", r.h.User.Login)
 }
