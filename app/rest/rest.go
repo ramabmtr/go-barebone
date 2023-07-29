@@ -87,15 +87,15 @@ func (r *Rest) Run() {
 	go func() {
 		err := r.e.Start(fmt.Sprintf(":%s", config.Conf.App.Port))
 		if err != nil && err != http.ErrServerClosed {
-			log.Fatal("shutting down the server")
+			log.Printf("error starting rest server. %s\n", err.Error())
 		}
 	}()
 }
 
 func (r *Rest) Stop(ctx context.Context) {
-	defer log.Println("rest stopped")
+	defer log.Println("rest server stopped")
 	err := r.e.Shutdown(ctx)
 	if err != nil {
-		log.Printf("error stopping rest. %s", err.Error())
+		log.Printf("error stopping rest server. %s\n", err.Error())
 	}
 }
