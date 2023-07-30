@@ -2,12 +2,12 @@ package scheduler
 
 import (
 	"context"
-	"log"
 
 	"github.com/labstack/gommon/random"
 	"github.com/ramabmtr/go-barebone/app/config"
 	"github.com/ramabmtr/go-barebone/app/util/appctx"
 	"github.com/robfig/cron/v3"
+	"github.com/rs/zerolog/log"
 )
 
 type Scheduler struct {
@@ -30,7 +30,7 @@ func CronFuncContextWrapper(f func(context.Context) error) func() {
 
 		err := f(ctx)
 		if err != nil {
-			log.Printf("error when processing scheduler with ID: %s. Err: %s", rid, err.Error())
+			log.Error().Err(err).Msgf("error when processing scheduler with ID: %s", rid)
 		}
 	}
 }
@@ -39,23 +39,23 @@ func (s *Scheduler) Run() {
 	for _, sc := range config.Conf.Scheduler {
 		fn, ok := mapCronFunc[sc.Name]
 		if !ok {
-			log.Printf("no route for scheduler \"%s\"\n", sc.Name)
+			log.Warn().Str("name", sc.Name).Msg("no route for scheduler")
 			continue
 		}
 
 		_, err := s.c.AddFunc(sc.Crontab, fn)
 		if err != nil {
-			log.Fatalf("error adding scheduler \"%s\". %s\n", sc.Name, err.Error())
+			log.Fatal().Err(err).Str("name", sc.Name).Msg("error adding scheduler")
 		}
 
-		log.Printf("scheduler \"%s\" registered\n", sc.Name)
+		log.Info().Str("name", sc.Name).Msg("scheduler registered")
 	}
 
 	s.c.Start()
 }
 
 func (s *Scheduler) Stop(ctx context.Context) {
-	defer log.Println("scheduler stopped")
+	defer log.Info().Msg("scheduler stopped")
 	ctxS := s.c.Stop()
 
 	for {

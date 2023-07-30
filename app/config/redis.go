@@ -3,10 +3,10 @@ package config
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -24,7 +24,7 @@ func InitRedisConn() {
 		})
 		err := r.Ping(context.TODO()).Err()
 		if err != nil {
-			log.Fatalf("failed to connect to redis. %s\n", err.Error())
+			log.Fatal().Err(err).Msg("failed to connect to redis")
 		}
 
 		RedisConn = r

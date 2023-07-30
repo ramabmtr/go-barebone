@@ -10,6 +10,7 @@ import (
 	userDom "github.com/ramabmtr/go-barebone/app/service/domain/user"
 	"github.com/ramabmtr/go-barebone/app/service/entity"
 	"github.com/ramabmtr/go-barebone/app/util/generator"
+	"github.com/rs/zerolog/log"
 )
 
 type authUseCase struct {
@@ -22,7 +23,7 @@ func NewAuthUseCase(userDomain userDom.User) Auth {
 	}
 }
 
-func (uc *authUseCase) jwtGen(user *entity.User) (string, error) {
+func (uc *authUseCase) jwtGen(ctx context.Context, user *entity.User) (string, error) {
 	now := time.Now()
 	claims := &entity.JWTCustomClaims{
 		Username: user.Username,
@@ -37,6 +38,7 @@ func (uc *authUseCase) jwtGen(user *entity.User) (string, error) {
 
 	t, err := token.SignedString([]byte(config.Conf.App.JWT.Secret))
 	if err != nil {
+		log.Error().Ctx(ctx).Err(err).Msg("fail to sign jwt token")
 		return "", err
 	}
 
@@ -50,6 +52,7 @@ func (uc *authUseCase) Register(ctx context.Context, p *entity.UserRegisterParam
 
 	err := uc.userDomain.Get(ctx, &currentUser)
 	if err != nil && err != errors.ErrDataNotFound {
+		log.Error().Ctx(ctx).Err(err).Msg("error when get user")
 		return nil, err
 	}
 
@@ -66,10 +69,11 @@ func (uc *authUseCase) Register(ctx context.Context, p *entity.UserRegisterParam
 
 	err = uc.userDomain.Create(ctx, &user)
 	if err != nil {
+		log.Error().Ctx(ctx).Err(err).Msg("error when create user")
 		return nil, err
 	}
 
-	token, err := uc.jwtGen(&user)
+	token, err := uc.jwtGen(ctx, &user)
 	if err != nil {
 		return nil, err
 	}
@@ -84,10 +88,11 @@ func (uc *authUseCase) Login(ctx context.Context, p *entity.UserLoginParam) (*en
 
 	err := uc.userDomain.Get(ctx, &user)
 	if err != nil {
+		log.Error().Ctx(ctx).Err(err).Msg("error when get user")
 		return nil, err
 	}
 
-	token, err := uc.jwtGen(&user)
+	token, err := uc.jwtGen(ctx, &user)
 	if err != nil {
 		return nil, err
 	}

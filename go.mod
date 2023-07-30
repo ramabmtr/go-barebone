@@ -12,6 +12,7 @@ require (
 	github.com/labstack/gommon v0.4.0
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/rs/zerolog v1.30.0
 	github.com/swaggo/swag v1.16.1
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.1

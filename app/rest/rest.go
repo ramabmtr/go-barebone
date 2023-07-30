@@ -3,7 +3,6 @@ package rest
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/ramabmtr/go-barebone/app/rest/handler"
 	"github.com/ramabmtr/go-barebone/app/service/entity"
 	"github.com/ramabmtr/go-barebone/app/util/appctx"
+	"github.com/rs/zerolog/log"
 )
 
 type Rest struct {
@@ -77,7 +77,11 @@ func (r *Rest) Run() {
 		LogStatus: true,
 		LogMethod: true,
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			log.Println(fmt.Sprintf("[REQUEST] [%s] %v, status: %v", v.Method, v.URI, v.Status))
+			log.Info().Ctx(c.Request().Context()).
+				Str("method", v.Method).
+				Str("uri", v.URI).
+				Int("status", v.Status).
+				Msg("incoming request")
 			return nil
 		},
 	}))
@@ -87,15 +91,15 @@ func (r *Rest) Run() {
 	go func() {
 		err := r.e.Start(fmt.Sprintf(":%s", config.Conf.App.Port))
 		if err != nil && err != http.ErrServerClosed {
-			log.Printf("error starting rest server. %s\n", err.Error())
+			log.Error().Err(err).Msg("error starting rest server")
 		}
 	}()
 }
 
 func (r *Rest) Stop(ctx context.Context) {
-	defer log.Println("rest server stopped")
+	defer log.Info().Msg("rest server stopped")
 	err := r.e.Shutdown(ctx)
 	if err != nil {
-		log.Printf("error stopping rest server. %s\n", err.Error())
+		log.Error().Err(err).Msg("error stopping rest server")
 	}
 }

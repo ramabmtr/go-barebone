@@ -1,12 +1,12 @@
 package config
 
 import (
-	"log"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/ramabmtr/go-barebone/app/util"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
 
@@ -75,21 +75,21 @@ func InitConf(confPath string) {
 
 		yamlFile, err := os.ReadFile(confPath)
 		if err != nil {
-			log.Fatalf("read yaml err: %s\n", err.Error())
+			log.Fatal().Err(err).Msg("read yaml failed")
 		}
 
 		err = yaml.Unmarshal(yamlFile, c)
 		if err != nil {
-			log.Fatalf("unmarshal yaml err: %s\n", err.Error())
+			log.Fatal().Err(err).Msg("unmarshal yaml failed")
 		}
 
 		// check enum value
 		if c.Database.Engine == "" || !util.StrIn(c.Database.Engine, DatabaseEngineInMemory, DatabaseEngineMySQL) {
-			log.Fatalln("database.engine is not set or not supported")
+			log.Fatal().Msg("database.engine is not set or not supported")
 		}
 
 		if c.Cache.Engine == "" || !util.StrIn(c.Cache.Engine, CacheEngineInMemory, CacheEngineRedis) {
-			log.Fatalln("cache.engine is not set or not supported")
+			log.Fatal().Msg("cache.engine is not set or not supported")
 		}
 
 		Conf = c

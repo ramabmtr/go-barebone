@@ -2,10 +2,11 @@ package handler
 
 import (
 	"context"
-	"log"
+
+	"github.com/rs/zerolog/log"
 )
 
-func Ping(_ context.Context) error {
-	log.Println("schedule pong")
+func Ping(ctx context.Context) error {
+	log.Info().Ctx(ctx).Msg("schedule pong")
 	return nil
 }

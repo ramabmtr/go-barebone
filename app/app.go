@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"sync"
@@ -14,9 +13,12 @@ import (
 	"github.com/ramabmtr/go-barebone/app/service/domain"
 	"github.com/ramabmtr/go-barebone/app/service/entity"
 	"github.com/ramabmtr/go-barebone/app/service/usecase"
+	"github.com/rs/zerolog/log"
 )
 
 func Run() {
+	config.InitLog()
+
 	// if db engine is mysql, prepare the connection and schema
 	if config.Conf.Database.Engine == config.DatabaseEngineMySQL {
 		config.InitMySQLConn()
@@ -25,7 +27,7 @@ func Run() {
 			&entity.User{},
 		)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err).Msg("schema migration failed")
 		}
 	}
 
