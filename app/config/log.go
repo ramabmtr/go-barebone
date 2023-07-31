@@ -8,15 +8,50 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const logTimeFormat = "2006-01-02T15:04:05.999Z07:00"
+const (
+	logTimeFormat = "2006-01-02T15:04:05.999Z07:00"
+
+	LogFormatJSON = "json"
+	LogFormatText = "text"
+
+	LogLevelError = "error"
+	LogLevelInfo  = "info"
+	LogLevelDebug = "debug"
+)
 
 func InitLog() {
 	zerolog.TimeFieldFormat = logTimeFormat
-	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: logTimeFormat}
-	log.Logger = zerolog.New(output).
-		With().Caller().Timestamp().
-		Logger().
-		Hook(tracingHook{})
+
+	setLogFormat()
+	setLogLevel()
+}
+
+func setLogFormat() {
+	var l zerolog.Logger
+	switch Conf.App.Log.Format {
+	case LogFormatJSON:
+		l = log.Logger
+	case LogFormatText:
+		output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: logTimeFormat}
+		l = zerolog.New(output)
+	default:
+		l = log.Logger
+	}
+
+	log.Logger = l.With().Caller().Timestamp().Logger().Hook(tracingHook{})
+}
+
+func setLogLevel() {
+	switch Conf.App.Log.Level {
+	case LogLevelError:
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	case LogLevelInfo:
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	case LogLevelDebug:
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	default:
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
 }
 
 type tracingHook struct{}

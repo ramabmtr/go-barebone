@@ -7,6 +7,16 @@ app:
   jwt:
     secret: Sup3rS3cr3t
     expired_time: 72h
+  log:
+    # format must be one of:
+    #   - json
+    #   - text
+    format: text
+    # level must be one of:
+    #   - error
+    #   - info
+    #   - debug
+    level: info
 
 database:
   # engine must be one of:

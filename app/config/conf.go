@@ -36,6 +36,10 @@ type config struct {
 			Secret      string        `yaml:"secret"`
 			ExpiredTime time.Duration `yaml:"expired_time"`
 		} `yaml:"jwt"`
+		Log struct {
+			Format string `yaml:"format"`
+			Level  string `yaml:"level"`
+		} `yaml:"log"`
 	} `yaml:"app"`
 
 	Database struct {
