@@ -12,7 +12,7 @@ DOCS_GENERATOR_TOOL_TAG := v1.8.12
 run: generate-config build
 	@$(BUILD_DIR)/$(APP_NAME)
 
-build: dep generate-docs
+build: generate-docs dep
 	@echo "Building app..."
 	@mkdir -p $(BUILD_DIR)
 	@go build -ldflags="-s -w" -tags=main -o $(BUILD_DIR)/$(APP_NAME)
