@@ -27,5 +27,4 @@ bin
 docs
 
 # local conf
-conf.yaml
-conf-*.yaml
+.env
